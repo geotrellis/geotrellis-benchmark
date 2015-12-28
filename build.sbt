@@ -17,7 +17,12 @@ lazy val commonSettings = Seq(
     "-feature"),
 
   resolvers += Resolver.bintrayRepo("azavea", "maven"),
-  libraryDependencies += "com.azavea" %% "scaliper" % "0.5.0-e9d4266",
+  libraryDependencies ++= Seq(
+    "com.azavea" %% "scaliper" % "0.5.0-c5566b1" % "test",
+    "org.scalatest"       %%  "scalatest"      % Version.scalaTest % "test"
+  ),
+
+  parallelExecution in Test := false,
 
   shellPrompt := { s => Project.extract(s).currentProject.id + " > " }
 ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
