@@ -7,7 +7,7 @@ import geotrellis.raster.io.geotiff._
 import spire.syntax.cfor._
 
 import scaliper._
-
+/*
 class HistogramBenchmark extends Benchmarks with ConsoleReport {
   benchmark("Histogram Benchmarks") {
 
@@ -84,4 +84,4 @@ class HistogramBenchmark extends Benchmarks with ConsoleReport {
     }
 
   }
-}
+}*/
