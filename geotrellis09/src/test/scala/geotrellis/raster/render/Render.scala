@@ -23,28 +23,69 @@ import geotrellis.render.png._
 
 import scaliper._
 
+
 class RenderBenchmark extends Benchmarks with ConsoleReport {
-  benchmark("Rendering Benchmarks") {
-    run("PNG Rendering") {
+  benchmark("PNG Rendering/Encoding Benchmarks") {
+    run("Rendering") {
       new Benchmark {
         var raster: Raster = _
         var renderer: Renderer = _
 
         override def setUp() = {
           val extent = Extent(1, 1, 1, 1)
-          val re = RasterExtent(extent, 1.0, 1.0, 256, 256)
+          val re = RasterExtent(extent, 1.0, 1.0, 2560, 2560)
+          raster = Raster(1 to 2560 * 2560 toArray, re)
           val histogram = FastMapHistogram.fromRaster(raster)
           val colors = Array(0x0000FF, 0x0080FF, 0x00FF80, 0xFFFF00, 0xFF8000)
 
-          raster = Raster(1 to 256 * 256 toArray, re)
           renderer = Renderer(histogram.getQuantileBreaks(colors.length), colors, 0x00000000, None)
         }
 
+        def run() = renderer.render(raster)
+      }
+    }
+    run("PNG Encoding") {
+      new Benchmark {
+        var r2: Raster = _
+        var renderer: Renderer = _
+
+        override def setUp() = {
+          val extent = Extent(1, 1, 1, 1)
+          val re = RasterExtent(extent, 1.0, 1.0, 2560, 2560)
+          val raster = Raster(1 to 2560 * 2560 toArray, re)
+          val histogram = FastMapHistogram.fromRaster(raster)
+          val colors = Array(0x0000FF, 0x0080FF, 0x00FF80, 0xFFFF00, 0xFF8000)
+          renderer = Renderer(histogram.getQuantileBreaks(colors.length), colors, 0x00000000, None)
+          r2 = renderer.render(raster)
+
+        }
+
         def run() = {
-          renderer.render(raster)
-          ()
+          new Encoder(renderer.settings).writeByteArray(r2)
+        }
+      }
+    }
+    run("Rendering and PNG Encoding") {
+      new Benchmark {
+        var raster: Raster = _
+        var renderer: Renderer = _
+
+        override def setUp() = {
+          val extent = Extent(1, 1, 1, 1)
+          val re = RasterExtent(extent, 1.0, 1.0, 2560, 2560)
+          raster = Raster(1 to 2560 * 2560 toArray, re)
+          val histogram = FastMapHistogram.fromRaster(raster)
+          val colors = Array(0x0000FF, 0x0080FF, 0x00FF80, 0xFFFF00, 0xFF8000)
+          renderer = Renderer(histogram.getQuantileBreaks(colors.length), colors, 0x00000000, None)
+
+        }
+
+        def run() = {
+          val r2 = renderer.render(raster)
+          new Encoder(renderer.settings).writeByteArray(r2)
         }
       }
     }
   }
 }
+
