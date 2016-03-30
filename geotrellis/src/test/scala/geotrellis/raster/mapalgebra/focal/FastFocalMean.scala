@@ -7,6 +7,7 @@ import geotrellis.raster.mapalgebra._
 import geotrellis.engine._
 import geotrellis.engine.op.focal._
 
+import benchmark.geotrellis.util._
 import scaliper._
 
 trait FocalMeanSetup { this: Benchmark =>

@@ -9,7 +9,7 @@ import scala.util.Random
 import scaliper._
 
 class  ApproxViewshedBenchmark extends Benchmarks with ConsoleReport {
-  benchmark("Corner viewshed") {
+  benchmark("Approx. Corner viewshed") {
     for(size <- Array[Int](256, 512, 1024, 2048, 4096, 8192)) {
       run(s"size: $size") {
         new Benchmark {
@@ -27,7 +27,7 @@ class  ApproxViewshedBenchmark extends Benchmarks with ConsoleReport {
     }
   }
 
-  benchmark("Center viewshed") {
+  benchmark("Approx. Center viewshed") {
     for(size <- Array[Int](256, 512, 1024, 2048, 4096, 8192)) {
       run(s"size: $size") {
         new Benchmark {
@@ -45,3 +45,4 @@ class  ApproxViewshedBenchmark extends Benchmarks with ConsoleReport {
     }
   }
 }
+

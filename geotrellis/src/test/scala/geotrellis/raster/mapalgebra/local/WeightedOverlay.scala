@@ -10,51 +10,15 @@ import geotrellis.raster.mapalgebra.local._
 import geotrellis.raster.summary._
 import geotrellis.raster.render._
 
+import benchmark.geotrellis.util._
+
 import scala.util.Random
+import scaliper._
 
-class WeightedOverlay extends OperationBenchmark {
-  val n = 4
-  val names = Array("SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k")
-  val weights = Array(2, 1, 5, 2)
-  val colors = Array(0x0000FF, 0x0080FF, 0x00FF80, 0xFFFF00, 0xFF8000, 0xFF0000)
-
-  @Param(Array("256","512", "1024", "2048", "4096"))
-  var size:Int = 0
-
-  var source:ValueSource[Png] = null
-  var sourceSeq:ValueSource[Png] = null
-
-  override def setUp() {
-    val re = getRasterExtent(names(0), size, size)
-    val total = weights.sum
-
-    source =
-      (0 until n).map(i => RasterSource(names(i),re) * weights(i))
-                 .reduce(_+_)
-                 .localDivide(total)
-                 .renderPng(colors)
-
-    sourceSeq =
-      (0 until n).map(i => RasterSource(names(i),re) * weights(i))
-                 .localAdd
-                 .localDivide(total)
-                 .renderPng(colors)
-  }
-
-  def timeWeightedOverlaySource(reps:Int) = run(reps)(weightedOverlaySource)
-  def weightedOverlaySource = get(source)
-
-  def timeWeightedOverlaySourceSeq(reps:Int) = run(reps)(weightedOverlaySourceSeq)
-  def weightedOverlaySourceSeq = get(sourceSeq)
-}
-
-object WeightedOverlayOverTypes extends BenchmarkRunner(classOf[WeightedOverlayOverTypes])
-class WeightedOverlayOverTypes extends OperationBenchmark {
-  @Param(Array("256","512", "1024"))
-  var size:Int = 0
-
-  @Param(Array("bit","byte","short","int","float","double"))
-  var cellType = ""
+trait WeightedOverlaySetup {
+  val cellType: String
+  val size: Int
+  val layerCount: Int
 
   val layers =
     Map(
@@ -66,8 +30,6 @@ class WeightedOverlayOverTypes extends OperationBenchmark {
       ("double","aspect-double")
     )
 
-  @Param(Array("4","8","16"))
-  var layerCount = 0
 
   val colors = Array(0x0000FF, 0x0080FF, 0x00FF80, 0xFFFF00, 0xFF8000, 0xFF0000)
 
@@ -78,7 +40,6 @@ class WeightedOverlayOverTypes extends OperationBenchmark {
     val weights = (0 until layerCount).map(i => Random.nextInt).toArray
     val re = getRasterExtent(layers(cellType), size, size)
     val total = weights.sum
-
     source =
       (0 until layerCount).map(i => RasterSource(layers(cellType),re) * weights(i))
                           .reduce(_+_)
@@ -91,10 +52,34 @@ class WeightedOverlayOverTypes extends OperationBenchmark {
                           .localDivide(total)
                           .renderPng(colors)
   }
-
-  def timeWeightedOverlaySource(reps:Int) = run(reps)(weightedOverlaySource)
-  def weightedOverlaySource = get(source)
-
-  def timeWeightedOverlaySourceSeq(reps:Int) = run(reps)(weightedOverlaySourceSeq)
-  def weightedOverlaySourceSeq = get(sourceSeq)
 }
+
+class WeightedOverlayBenchmarks extends Benchmarks {
+  for (ct <- Array("bit", "byte", "short", "int", "float", "double")) {
+    benchmark("Weighted Overlay - ${ct} cells") {
+      for (s <- Array(256, 512, 1024, 2048, 4096)) {
+        for (lc <- Array(4, 8, 16)) {
+          run("from folding addition - size: ${size}; layers: ${lc}") {
+            new Benchmark with WeightedOverlaySetup {
+              val cellType = ct
+              val size = s
+              val layerCount = lc
+
+              def run = get(source)
+            }
+          }
+          run("from localAdd on Seq - size: ${size}; layers: ${lc}") {
+            new Benchmark with WeightedOverlaySetup {
+              val cellType = ct
+              val size = s
+              val layerCount = lc
+
+              def run = get(sourceSeq)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

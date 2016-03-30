@@ -6,32 +6,40 @@ import geotrellis.vector._
 import geotrellis.raster._
 
 import scala.util.Random
+import scaliper._
 
-/*
- * Current times for 256x256 (ms)
- * [info] CornerRequiredHeight 1363 ==============================
- * [info] CenterRequiredHeight  680 ==============
- */
-class  ViewshedBenchmark extends OperationBenchmark {
-  var r: Tile = _
+class  ViewshedBenchmark extends Benchmarks {
+  benchmark("Corner viewshed") {
+    for (size <- Array(256, 512, 1024, 2048, 4096, 8192)) {
+      run("size: ${size}") {
+        new Benchmark {
+          var r: Tile = _
 
-  //@Param(Array("512","1024","2048","4096","8192"))
-  var size:Int = 256
+          override def setUp() {
+            val a = Array.ofDim[Int](size * size).map(a => Random.nextInt(255))
+            r = IntArrayTile(a, size, size)
+          }
 
-  override def setUp() {
-    r = {
-      val a = Array.ofDim[Int](size * size).map(a => Random.nextInt(255))
-      IntArrayTile(a, size, size)
+          def run = Viewshed(r, 0, 0)
+        }
+      }
     }
   }
+  benchmark("Center viewshed") {
+    for (size <- Array(256, 512, 1024, 2048, 4096, 8192)) {
+      run("size: ${size}") {
+        new Benchmark {
+          var r: Tile = _
 
-  def timeCornerRequiredHeight(reps:Int) = run(reps)(cornerRequiredHeight)
-  def cornerRequiredHeight() {
-    Viewshed(r, 0, 0)
-  }
+          override def setUp() {
+            val a = Array.ofDim[Int](size * size).map(a => Random.nextInt(255))
+            r = IntArrayTile(a, size, size)
+          }
 
-  def timeCenterRequiredHeight(reps:Int) = run(reps)(centerRequiredHeight)
-  def centerRequiredHeight() {
-    Viewshed(r, size/2, size/2)
+          def run = Viewshed(r, size/2, size/2)
+        }
+      }
+    }
   }
 }
+
