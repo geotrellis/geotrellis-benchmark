@@ -6,16 +6,21 @@ import benchmark.geotrellis.util._
 
 import scaliper._
 
-class TileForeach extends Benchmarks {
-  benchmark("While Loop") {
-    for (size <- Array(64, 128, 256, 512, 1024)) {
-      run("size: ${size}") {
-        new Benchmark {
-          var tile: Tile = null
+trait TileForEachSetup { this: Benchmark =>
+  val size: Int
+  var tile: Tile = null
 
-          override def setUp() {
-            tile = get(loadRaster("SBN_farm_mkt", size, size))
-          }
+  override def setUp() {
+    tile = get(loadRaster("SBN_farm_mkt", size, size))
+  }
+}
+
+class TileForeachBenchmarks extends Benchmarks {
+  benchmark("While Loop") {
+    for (s <- Array(64, 128, 256, 512, 1024)) {
+      run("size: ${s}") {
+        new Benchmark with TileForEachSetup {
+          val size = s
 
           def run = {
             var t = 0
@@ -33,14 +38,10 @@ class TileForeach extends Benchmarks {
     }
   }
   benchmark("Tile foreach") {
-    for (size <- Array(64, 128, 256, 512, 1024)) {
-      run("size: ${size}") {
-        new Benchmark {
-          var tile: Tile = null
-
-          override def setUp() {
-            tile = get(loadRaster("SBN_farm_mkt", size, size))
-          }
+    for (s <- Array(64, 128, 256, 512, 1024)) {
+      run("size: ${s}") {
+        new Benchmark with TileForEachSetup {
+          val size = s
 
           def run = {
             var t = 0
