@@ -9,53 +9,46 @@ import geotrellis.raster.render._
 import benchmark.geotrellis.util._
 import scaliper._
 
+trait WeightedAddSetup { this: Benchmark =>
+  val size: Int
+  var source: RasterSource = null
+  var sourceSeq: RasterSource = null
+  var weights: Seq[Int] = null
+  var names: Seq[String] = null
+
+  override def setUp() {
+    weights = Seq(2, 1, 5, 2,
+                  2, 1, 5, 2,
+                  2, 1, 5, 2,
+                  2, 1, 5, 2)
+    names = Seq("SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k",
+                "SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k",
+                "SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k",
+                "SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k")
+    val n = names.length
+    val re = getRasterExtent(names(0), size, size)
+
+    source =
+      (0 until n).map(i => RasterSource(names(i), re) * weights(i))
+                 .reduce(_ + _)
+    sourceSeq =
+      (0 until n).map(i => RasterSource(names(i), re) * weights(i))
+                 .localAdd
+  }
+}
+
 class WeightedAdd extends Benchmarks {
   benchmark("Weighted addition") {
-    for (size <- Array(256, 512, 1024, 2048, 4096)) {
+    for (s <- Array(256, 512, 1024, 2048, 4096)) {
       run("by folding over Seq") {
-        new Benchmark {
-          val names = Array("SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k",
-                            "SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k",
-                            "SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k",
-                            "SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k")
-          val weights = Array(2, 1, 5, 2,
-                              2, 1, 5, 2,
-                              2, 1, 5, 2,
-                              2, 1, 5, 2)
-          var source: RasterSource = null
-
-          override def setUp() {
-            val n = names.length
-            val re = getRasterExtent(names(0), size, size)
-
-            source =
-              (0 until n).map(i => RasterSource(names(i), re) * weights(i))
-                         .reduce(_ + _)
-          }
-        def run = get(source)
-
+        new Benchmark with WeightedAddSetup{
+          val size = s
+          def run = get(source)
         }
       }
       run("by localAdd on Seq") {
-        new Benchmark {
-          val names = Array("SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k",
-                            "SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k",
-                            "SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k",
-                            "SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k")
-          val weights = Array(2, 1, 5, 2,
-                              2, 1, 5, 2,
-                              2, 1, 5, 2,
-                              2, 1, 5, 2)
-          var sourceSeq: RasterSource = null
-
-          override def setUp() {
-            val n = names.length
-            val re = getRasterExtent(names(0), size, size)
-
-            sourceSeq =
-              (0 until n).map(i => RasterSource(names(i), re) * weights(i))
-                         .localAdd
-          }
+        new Benchmark with WeightedAddSetup {
+          val size = s
           def run = get(sourceSeq)
         }
       }

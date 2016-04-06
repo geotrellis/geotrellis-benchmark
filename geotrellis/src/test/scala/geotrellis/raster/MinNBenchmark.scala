@@ -3,15 +3,16 @@ package benchmark.geotrellis.raster
 import geotrellis.raster._
 import geotrellis.raster.mapalgebra.local._
 
+import benchmark.geotrellis.util._
 import spire.syntax.cfor._
+import scaliper._
 
-class MinNImplementation extends OperationBenchmark {
-  @Param(Array("64", "512", "1024"))
-  var size: Int = 0
+trait MinNSetup { this: Benchmark =>
+  val size: Int
 
-  var quickSelectInPlace: Tile = null
-  var quickSelectImmutable: Tile = null
-  var arraySort: Tile = null
+  var quickSelectInPlace: Unit => Tile = null
+  var quickSelectImmutable: Unit => Tile = null
+  var arraySort: Unit => Tile = null
 
   override def setUp() {
     val r = loadRaster("SBN_farm_mkt", size, size)
@@ -21,19 +22,44 @@ class MinNImplementation extends OperationBenchmark {
     val r4 = (r + 4)
     val r5 = (r + 5)
 
-    quickSelectInPlace = MinN(2, r1, r2, r3, r4, r5)
-    quickSelectImmutable = ImmutableMinN(2, r1, r2, r3, r4, r5)
-    arraySort = ArrayMinN(2, r1, r2, r3, r4, r5)
+    quickSelectInPlace = { _ => MinN(2, r1, r2, r3, r4, r5) }
+    quickSelectImmutable = { _ => ImmutableMinN(2, r1, r2, r3, r4, r5) }
+    arraySort = { _ => ArrayMinN(2, r1, r2, r3, r4, r5) }
   }
 
-  def timeMinNQuickSelectInPlace(reps: Int) = run(reps)(minNInPlace)
-  def minNInPlace = get(quickSelectInPlace)
+}
 
-  def timeMinNQuickSelectImmutable(reps: Int) = run(reps)(minNImmutable)
-  def minNImmutable = get(quickSelectImmutable)
-
-  def timeMinNArray(reps: Int) = run(reps)(minNArray)
-  def minNArray = get(arraySort)
+class MinNImplementation extends Benchmarks {
+  benchmark("MinN in place") {
+    for (s <- Array(64, 512, 1024)) {
+      run(s"size: ${s}") {
+        new Benchmark with MinNSetup {
+          val size: Int = s
+          def run = quickSelectInPlace()
+        }
+      }
+    }
+  }
+  benchmark("MinN Immutable") {
+    for (s <- Array(64, 512, 1024)) {
+      run(s"size: ${s}") {
+        new Benchmark with MinNSetup {
+          val size: Int = s
+          def run = quickSelectImmutable()
+        }
+      }
+    }
+  }
+  benchmark("MinN Array") {
+    for (s <- Array(64, 512, 1024)) {
+      run(s"size: ${s}") {
+        new Benchmark with MinNSetup {
+          val size: Int = s
+          def run = arraySort()
+        }
+      }
+    }
+  }
 }
 
 object ImmutableMinN extends Serializable {

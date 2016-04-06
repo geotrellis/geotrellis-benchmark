@@ -15,10 +15,10 @@ trait TileForEachSetup { this: Benchmark =>
   }
 }
 
-class TileForeachBenchmarks extends Benchmarks {
+class TileForEachBenchmarks extends Benchmarks {
   benchmark("While Loop") {
     for (s <- Array(64, 128, 256, 512, 1024)) {
-      run("size: ${s}") {
+      run(s"size: ${s}") {
         new Benchmark with TileForEachSetup {
           val size = s
 
@@ -39,7 +39,7 @@ class TileForeachBenchmarks extends Benchmarks {
   }
   benchmark("Tile foreach") {
     for (s <- Array(64, 128, 256, 512, 1024)) {
-      run("size: ${s}") {
+      run(s"size: ${s}") {
         new Benchmark with TileForEachSetup {
           val size = s
 

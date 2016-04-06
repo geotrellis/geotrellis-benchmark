@@ -49,22 +49,22 @@ class FocalMeanBenchmark extends Benchmarks {
   benchmark("Focal mean") {
     run("normal focal mean") {
       new Benchmark with FocalMeanSetup {
-        def meanOp = get(op)
+        def run = get(op)
       }
     }
     run("fast focal mean") {
       new Benchmark with FocalMeanSetup {
-        def fastMeanOp = get(fastOp)
+        def run = get(fastOp)
       }
     }
     run("sourced focal mean") {
       new Benchmark with FocalMeanSetup {
-        def meanSource = get(source)
+        def run = get(source)
       }
     }
     run("source fast focal mean") {
       new Benchmark with FocalMeanSetup {
-        def fastMeanSource = get(fastSource)
+        def run = get(fastSource)
       }
     }
   }

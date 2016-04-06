@@ -31,13 +31,13 @@ trait RescaleSetup { this: Benchmark =>
 class RescaleBenchmarks extends Benchmarks {
   benchmark("Rescaling tile values") {
     for (s <- Array(256, 512, 1024, 2048, 4096, 8192)) {
-      run("Op - size: ${s}") {
+      run(s"Op: ${s}") {
         new Benchmark with RescaleSetup {
           val size = s
           def run = get(op)
         }
       }
-      run("Source - size: ${s}") {
+      run(s"Source: ${s}") {
         new Benchmark with RescaleSetup {
           val size = s
           def run = get(source)

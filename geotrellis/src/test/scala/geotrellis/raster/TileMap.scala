@@ -21,9 +21,8 @@ trait TileMapSetup { this: Benchmark =>
   var tile: Tile = null
   var doubleTile: Tile = null
   var computedRaster: Tile = null
-  val names = Array("SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k")
-  val weights = Array(2, 1, 5, 2)
-
+  var names: Array[String] = null
+  var weights: Array[Int] = null
   var array: Array[Byte] = null
   var length: Int = 0
   var rasterData: ByteArrayTile = null
@@ -31,6 +30,8 @@ trait TileMapSetup { this: Benchmark =>
   override def setUp() {
     val len = size * size
     val re = RasterExtent(Extent(0, 0, size, size), 1.0, 1.0, size, size)
+    names = Array("SBN_farm_mkt", "SBN_RR_stops_walk", "SBN_inc_percap", "SBN_street_den_1k")
+    weights = Array(2, 1, 5, 2)
     tile = ArrayTile(init(len)(Random.nextInt), size, size)
     doubleTile = ArrayTile(init(len)(Random.nextDouble), size, size)
 

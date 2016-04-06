@@ -5,13 +5,13 @@ import geotrellis.raster.mapalgebra.focal._
 import geotrellis.raster.io.geotiff._
 
 import scaliper._
-/*
+
 trait ConvolveBenchmarkSetup { self: Benchmark =>
   def getTile: Tile
 
-  def sbnTile = SingleBandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
+  def sbnTile = SinglebandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
   def byteFillTile = {
-    val sbnTile = SingleBandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
+    val sbnTile = SinglebandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
     val m = sbnTile.mutable
     for(col <- 0 until sbnTile.cols) {
       for(row <- 0 until sbnTile.rows) {
@@ -32,7 +32,7 @@ trait ConvolveBenchmarkSetup { self: Benchmark =>
 }
 
 class ConvolveBenchmark extends Benchmarks with ConsoleReport with EndpointReport {
-  benchmark("Convolve Benchmarks") { 
+  benchmark("Convolve Benchmarks") {
     run("Convolve SBN tile") {
       new Benchmark with ConvolveBenchmarkSetup {
         def getTile = sbnTile
@@ -47,4 +47,4 @@ class ConvolveBenchmark extends Benchmarks with ConsoleReport with EndpointRepor
       }
     }
   }
-}*/
+}

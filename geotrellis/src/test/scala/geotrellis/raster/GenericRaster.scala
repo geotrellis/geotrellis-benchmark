@@ -6,6 +6,10 @@ import geotrellis.raster.mapalgebra.local._
 
 import scala.util.Random
 
+import benchmark.geotrellis.util._
+import scaliper._
+
+
 class GRaster[T](val array: Array[T]) {
   val size = array.size
   val newArr = array.clone
@@ -19,9 +23,8 @@ class GRaster[T](val array: Array[T]) {
   }
 }
 
-class GenericRaster extends OperationBenchmark {
-  @Param(Array("128", "256", "512", "1024", "2048", "4096", "8192"))
-  var size: Int = 0
+trait GenericRasterSetup { this: Benchmark =>
+  val size: Int
 
   var tile: Tile = null
   var genericRaster: GRaster[Int] = null
@@ -30,12 +33,28 @@ class GenericRaster extends OperationBenchmark {
     val len = size * size
     tile = ArrayTile(init(len)(Random.nextInt), size, size)
     genericRaster = new GRaster(init(len)(Random.nextInt))
-
   }
+}
 
-  def timeGenericRasterMap(reps: Int) = run(reps)(genericRasterMap)
-  def genericRasterMap = genericRaster.map { i => i * i }
-
-  def timeRasterMap(reps: Int) = run(reps)(rasterMap)
-  def rasterMap = tile.map { i => i * i }
+class GenericRaster extends Benchmarks {
+  benchmark("Generic Raster Map") {
+    for (s <- Array(128, 256, 512, 1024, 2048, 4096, 8192)) {
+      run(s"size: ${s}") {
+        new Benchmark with GenericRasterSetup {
+          val size = s
+          def run = genericRaster.map { i => i * i }
+        }
+      }
+    }
+  }
+  benchmark("Raster Map") {
+    for (s <- Array(128, 256, 512, 1024, 2048, 4096, 8192)) {
+      run(s"size: ${s}") {
+        new Benchmark with GenericRasterSetup {
+          val size = s
+          def run = tile.map { i => i * i }
+        }
+      }
+    }
+  }
 }

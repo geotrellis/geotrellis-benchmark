@@ -5,7 +5,7 @@ import geotrellis.raster._
 import geotrellis.raster.io.geotiff._
 
 import scaliper._
-/*
+
 class SlopeBenchmark extends Benchmarks with ConsoleReport {
   benchmark("Slope Benchmarks") {
     run("Slope Byte Raster") {
@@ -14,7 +14,7 @@ class SlopeBenchmark extends Benchmarks with ConsoleReport {
         var cellSize: CellSize = _
 
         override def setUp() = {
-          tile = SingleBandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
+          tile = SinglebandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
           cellSize = CellSize(75.0, 75.0)
         }
 
@@ -22,4 +22,4 @@ class SlopeBenchmark extends Benchmarks with ConsoleReport {
       }
     }
   }
-}*/
+}

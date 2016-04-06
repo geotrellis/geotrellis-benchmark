@@ -7,7 +7,7 @@ import geotrellis.raster.io.geotiff._
 import spire.syntax.cfor._
 
 import scaliper._
-/*
+
 class HistogramBenchmark extends Benchmarks with ConsoleReport {
   benchmark("Histogram Benchmarks") {
 
@@ -19,7 +19,7 @@ class HistogramBenchmark extends Benchmarks with ConsoleReport {
         var cols: Int = _
 
         override def setUp() = {
-          tile = SingleBandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
+          tile = SinglebandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
           histogram = FastMapHistogram()
           rows = tile.rows
           cols = tile.cols
@@ -43,7 +43,7 @@ class HistogramBenchmark extends Benchmarks with ConsoleReport {
         var cols: Int = _
 
         override def setUp() = {
-          tile = SingleBandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
+          tile = SinglebandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
           histogram = StreamingHistogram(80)
           rows = tile.rows
           cols = tile.cols
@@ -67,7 +67,7 @@ class HistogramBenchmark extends Benchmarks with ConsoleReport {
         var cols: Int = _
 
         override def setUp() = {
-          tile = SingleBandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
+          tile = SinglebandGeoTiff("data/geotiff/SBN_inc_percap.tif").tile
           histogram = StreamingHistogram(1000)
           rows = tile.rows
           cols = tile.cols
@@ -82,6 +82,5 @@ class HistogramBenchmark extends Benchmarks with ConsoleReport {
         }
       }
     }
-
   }
-}*/
+}

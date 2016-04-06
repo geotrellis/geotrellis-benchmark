@@ -51,6 +51,11 @@ trait FocalOperationsSetup { this: Benchmark =>
 }
 
 class FocalOperationsBenchmark extends Benchmarks {
+  def neighborhoodName(neighborhood: Neighborhood): String = neighborhood match {
+    case Square(_) => "Square"
+    case Circle(_) => "Circle"
+    case _ => "Unexpected neighborhood type"
+  }
   benchmark("Focal MapAlgebra operations") {
     run("Conway's Game of Life") {
       new Benchmark with FocalOperationsSetup {
@@ -78,42 +83,43 @@ class FocalOperationsBenchmark extends Benchmarks {
       }
     }
     for (neighborhood <- Array[Int => Neighborhood](Square.apply, { i: Int => Circle.apply(i.toDouble) })) {
-      run("max - ${neighborhood}") {
+      run(s"max: ${neighborhoodName(neighborhood(1))}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(r.focalMax(neighborhood(1)))
         }
       }
-      run("min - ${neighborhood}") {
+      run(s"min: ${neighborhoodName(neighborhood(1))}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(r.focalMin(neighborhood(1)))
         }
       }
-      run("std deviation - ${neighborhood}") {
-        new Benchmark with FocalOperationsSetup {
-          def run = get(r.focalStandardDeviation(neighborhood(1)))
-        }
-      }
-      run("median - ${neighborhood}") {
+      // TODO: make this serialize - currently unclear why it isn't
+      //run(s"std deviation: ${neighborhoodName(neighborhood(1))}") {
+      //  new Benchmark with FocalOperationsSetup {
+      //    def run = get(r.focalStandardDeviation(neighborhood(1)))
+      //  }
+      //}
+      run(s"median: ${neighborhoodName(neighborhood(1))}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(r.focalMedian(neighborhood(1)))
         }
       }
-      run("mean - ${neighborhood}") {
+      run(s"mean: ${neighborhoodName(neighborhood(1))}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(r.focalMean(neighborhood(1)))
         }
       }
-      run("mode - ${neighborhood}") {
+      run(s"mode: ${neighborhoodName(neighborhood(1))}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(Mode(r, neighborhood(1)))
         }
       }
-      run("moran - ${neighborhood}") {
+      run(s"moran: ${neighborhoodName(neighborhood(1))}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(r.tileMoransI(neighborhood(1)))
         }
       }
-      run("sum - ${neighborhood}") {
+      run(s"sum: ${neighborhoodName(neighborhood(1))}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(r.focalSum(neighborhood(1)))
         }
@@ -122,12 +128,12 @@ class FocalOperationsBenchmark extends Benchmarks {
   }
   benchmark("FocalMean vs FastFocalMean") {
     for (neighborhoodSize <- Array[Int](1, 3, 7)) {
-      run("FocalMean - size: ${neighborhoodSize}; type: ${neighborhoodType}") {
+      run(s"FocalMean: ${neighborhoodSize}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(Mean(r, Square(neighborhoodSize)))
         }
       }
-      run("FastFocalMean") {
+      run(s"FastFocalMean: ${neighborhoodSize}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(FastFocalMean(r, 1))
         }

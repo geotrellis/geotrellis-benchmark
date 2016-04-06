@@ -49,37 +49,37 @@ trait ArgReaderSetup { this: Benchmark =>
 class ArgReaderBenchmarks extends Benchmarks {
   benchmark("Reading ARGs") {
     for(ct <- Array("bit", "byte", "short", "int", "float", "double")) {
-      run(s"loadRaster w/ $ct cells") {
+      run(s"loadRaster: $ct") {
         new Benchmark with ArgReaderSetup {
           val cellType = ct
           def run = { GeoTrellis.get(LoadRaster(layers(cellType))) }
         }
       }
-      run(s"rasterSource w/ $ct cells") {
+      run(s"rasterSource: $ct") {
         new Benchmark with ArgReaderSetup {
           val cellType = ct
           def run = { RasterSource(layers(cellType)).get }
         }
       }
-      run(s"loadRaster+Extent w/ $ct cells") {
+      run(s"loadRaster+Extent: $ct") {
         new Benchmark with ArgReaderSetup {
           val cellType = ct
           def run = { GeoTrellis.get(LoadRaster(layers(cellType), targetExtent)) }
         }
       }
-      run(s"rasterSource+Extent w/ $ct cells") {
+      run(s"rasterSource+Extent: $ct") {
         new Benchmark with ArgReaderSetup {
           val cellType = ct
           def run = { RasterSource(layers(cellType), targetExtent).get }
         }
       }
-      run(s"newReader w/ $ct cells") {
+      run(s"newReader: $ct") {
         new Benchmark with ArgReaderSetup {
           val cellType = ct
           def run = { arg.ArgReader.read(path, typ, rasterExtent, rasterExtent) }
         }
       }
-      run(s"newReader+Extent w/ $ct cells") {
+      run(s"newReader+Extent: $ct") {
         new Benchmark with ArgReaderSetup {
           val cellType = ct
           def run = arg.ArgReader.read(path, typ, rasterExtent, targetExtent)
@@ -118,18 +118,18 @@ trait ReadAndResampleSetup { this: Benchmark =>
   }
 }
 
-class ReadAndResampleBenchmark extends Benchmarks {
+class ReadARGBenchmark extends Benchmarks {
   benchmark("read and resample ARGs") {
     for (ct <- Array("bit", "byte", "short", "int", "float", "double")) {
       for (s<- Array(256, 512, 979, 1400, 2048, 4096)) {
-        run(s"Read - cells: ${ct}; size: ${s}") {
+        run(s"Read: ${ct}; ${s}") {
           new Benchmark with ReadAndResampleSetup {
             val cellType = ct
             val size = s
             def run = arg.ArgReader.read(path, typ, extent, targetExtent)
           }
         }
-        run(s"Read+Resample - cells: ${ct}; size: ${s}") {
+        run(s"Read+Resample: ${ct}; ${s}") {
           new Benchmark with ReadAndResampleSetup {
             val cellType = ct
             val size = s
@@ -145,16 +145,16 @@ class ReadAndResampleBenchmark extends Benchmarks {
 }
 
 trait SmallTileReadAndResampleSetup { this: Benchmark =>
-  var cellType: String
+  val cellType: String
 
-  var size = 256
-  val layers = 
+  val size = 256
+  val layers =
     Map(
       ("bit", "wm_DevelopedLand"),
       ("byte", "SBN_car_share"),
       ("short", "travelshed-int16"),
       ("int", "travelshed-int32"),
-      ("float", "aspect"), 
+      ("float", "aspect"),
       ("double", "aspect-double")
     )
 
@@ -177,21 +177,20 @@ trait SmallTileReadAndResampleSetup { this: Benchmark =>
     val extent = Extent(xmin, ymin, (xmin + xmax) / 2.0, (ymin + ymax) / 2.0)
     targetExtent = RasterExtent(extent, size, size)
   }
-
 }
 
-class SmallTileReadAndResampleBenchmark extends Benchmarks {
+class SmallTileARGBenchmarks extends Benchmarks {
   benchmark("read and resample w/ small tiles") {
     for (ct <- Array("bit", "byte", "short", "int", "float", "double")) {
-      run("NewReader+Extent w/ $ct cells"){
+      run(s"NewReader+Extent: $ct"){
         new Benchmark with SmallTileReadAndResampleSetup {
-          val cellType = ct
+          val cellType: String = ct
           def run = arg.ArgReader.read(path, typ, rasterExtent, targetExtent)
         }
       }
-      run("NewReader+Extent+Resample w/ $cellType cells"){
+      run(s"NewReader+Extent+Resample: $ct"){
         new Benchmark with SmallTileReadAndResampleSetup {
-          val cellType = ct
+          val cellType: String = ct
           def run = {
             val r = arg.ArgReader.read(path, typ, rasterExtent.cols, rasterExtent.rows)
             r.resample(rasterExtent.extent, targetExtent)
@@ -250,11 +249,6 @@ class TileIOBenchmarks extends Benchmarks {
     run("RasterSource+Extent"){
       new Benchmark with TileIOSetup {
         def run = RasterSource("mtsthelens_tiled", targetExtent).get
-      }
-    }
-    run("RasterSource+Resample"){
-      new Benchmark with TileIOSetup {
-        def run = RasterSource("mtsthelens_tiled").resample(targetExtent).get
       }
     }
   }

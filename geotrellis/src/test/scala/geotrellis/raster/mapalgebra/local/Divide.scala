@@ -13,10 +13,10 @@ import scaliper._
 
 class DivideBenchmark extends Benchmarks {
   benchmark("Local Divide") {
-    for (size <- Array(256, 512, 1024, 2048, 4096, 8192)) {
-      run("Op") {
+    for (s <- Array(256, 512, 1024, 2048, 4096, 8192)) {
+      run(s"Op; size: ${s}") {
         new Benchmark {
-          var size: Int = 0
+          val size: Int = s
 
           var op: Op[Tile] = null
 
@@ -31,9 +31,9 @@ class DivideBenchmark extends Benchmarks {
           def run = get(op)
         }
       }
-      run("Source") {
+      run(s"Source; size: ${s}") {
         new Benchmark {
-          var size: Int = 0
+          val size: Int = s
 
           var op: Op[Tile] = null
           var source: RasterSource = null

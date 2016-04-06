@@ -15,13 +15,19 @@ import benchmark.geotrellis.util._
 import scala.util.Random
 import scaliper._
 
-trait WeightedOverlaySetup {
+trait WeightedOverlaySetup { this: Benchmark =>
   val cellType: String
   val size: Int
   val layerCount: Int
 
-  val layers =
-    Map(
+  var layers: Map[String, String] = null
+  var colors: Array[Int] = null
+  var source:ValueSource[Png] = null
+  var sourceSeq:ValueSource[Png] = null
+
+  override def setUp() {
+    colors = Array(0x0000FF, 0x0080FF, 0x00FF80, 0xFFFF00, 0xFF8000, 0xFF0000)
+    layers = Map(
       ("bit","wm_DevelopedLand"),
       ("byte", "SBN_car_share"),
       ("short","travelshed-int16"),
@@ -31,12 +37,6 @@ trait WeightedOverlaySetup {
     )
 
 
-  val colors = Array(0x0000FF, 0x0080FF, 0x00FF80, 0xFFFF00, 0xFF8000, 0xFF0000)
-
-  var source:ValueSource[Png] = null
-  var sourceSeq:ValueSource[Png] = null
-
-  override def setUp() {
     val weights = (0 until layerCount).map(i => Random.nextInt).toArray
     val re = getRasterExtent(layers(cellType), size, size)
     val total = weights.sum
@@ -51,15 +51,15 @@ trait WeightedOverlaySetup {
                           .localAdd
                           .localDivide(total)
                           .renderPng(colors)
-  }
+                        }
 }
 
 class WeightedOverlayBenchmarks extends Benchmarks {
   for (ct <- Array("bit", "byte", "short", "int", "float", "double")) {
-    benchmark("Weighted Overlay - ${ct} cells") {
+    benchmark(s"Weighted Overlay: ${ct}") {
       for (s <- Array(256, 512, 1024, 2048, 4096)) {
         for (lc <- Array(4, 8, 16)) {
-          run("from folding addition - size: ${size}; layers: ${lc}") {
+          run(s"fold: ${s}; ${ct}; ${lc} layers") {
             new Benchmark with WeightedOverlaySetup {
               val cellType = ct
               val size = s
@@ -68,7 +68,7 @@ class WeightedOverlayBenchmarks extends Benchmarks {
               def run = get(source)
             }
           }
-          run("from localAdd on Seq - size: ${size}; layers: ${lc}") {
+          run(s"localAdd: ${s}; ${ct}; ${lc} layers") {
             new Benchmark with WeightedOverlaySetup {
               val cellType = ct
               val size = s
