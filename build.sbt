@@ -30,7 +30,7 @@ lazy val commonSettings = Seq(
 lazy val root = Project("root", file(".")).
   dependsOn(geotrellisRaster)
 
-lazy val geotrellisRaster = Project("geotrellis-raster-benchmark", file("geotrellis/raster")).
+lazy val geotrellisRaster = Project("geotrellis-benchmark", file("geotrellis")).
   settings(commonSettings: _*)
 
 lazy val geotrellis09 = Project("geotrellis09-benchmark", file("geotrellis09")).
