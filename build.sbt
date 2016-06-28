@@ -36,5 +36,11 @@ lazy val geotrellisRaster = Project("geotrellis-benchmark", file("geotrellis")).
 lazy val geotrellisSpark = Project("geotrellis-spark-benchmark", file("geotrellis/spark")).
   settings(commonSettings: _*)
 
+lazy val geotrellisRaster010 = Project("geotrellis010-benchmark", file("geotrellis010")).
+  settings(commonSettings: _*)
+
+lazy val geotrellisSpark010 = Project("geotrellis010-spark-benchmark", file("geotrellis010/spark")).
+  settings(commonSettings: _*)
+
 lazy val geotrellis09 = Project("geotrellis09-benchmark", file("geotrellis09")).
   settings(commonSettings: _*)

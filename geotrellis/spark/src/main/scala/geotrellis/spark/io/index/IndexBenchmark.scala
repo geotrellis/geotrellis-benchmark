@@ -21,13 +21,13 @@ object SpatialIndexBenchmark {
     } yield {
       val col = scala.util.Random.nextInt(65536)
       val row = scala.util.Random.nextInt(65536)
-      val size = scala.util.Random.nextInt(1000000)    
+      val size = scala.util.Random.nextInt(1000000)
       // val width = scala.util.Random.nextInt(size+1)
       val width = 9000 //scala.util.Random.nextInt(65536)
       val height = 9000 //scala.util.Random.nextInt(65536)
       KeyBounds(
         SpatialKey(col, row),
-        SpatialKey(col+width, row+height))   
+        SpatialKey(col+width, row+height))
     }
   }.toArray
 
@@ -41,13 +41,13 @@ object SpatialIndexBenchmark {
   def benchmark(index: KeyIndex[SpatialKey]): Array[Rec] = {
     var out = new Array[Rec](bounds.length)
 
-    for { 
-      i <- 0 until bounds.length 
+    for {
+      i <- 0 until bounds.length
     } {
-      val b = bounds(i)      
+      val b = bounds(i)
       val ts = for ( _ <- 1 to 3) yield {
         time { index.indexRanges(b.minKey, b.maxKey) }
-      }        
+      }
 
       val ranges = ts.head._1
       val nanos = ts.map(_._2).min
@@ -58,7 +58,7 @@ object SpatialIndexBenchmark {
     out
   }
 }
-    
+
 
 object ZCurveBenchmark extends App {
   import java.io._
@@ -71,12 +71,15 @@ object ZCurveBenchmark extends App {
 
   def writeToFile(recs: Seq[Rec], file: String): Unit = {
     val str = recs.map { r =>
-      s"${r.col},${r.row},${r.width},${r.height},${r.rangeCount},${r.nanos}" 
+      s"${r.col},${r.row},${r.width},${r.height},${r.rangeCount},${r.nanos}"
     }.mkString("\n")
     printToFile(file)("col,row,width,height,ranges,nanos\n" + str)
   }
 
-  val zorder = new ZSpatialKeyIndex()
+  val zorder = {
+    val max = (math.pow(2,32)-1).toInt
+    new ZSpatialKeyIndex(KeyBounds(SpatialKey(0,0), SpatialKey(max, max)))
+  }
   val hilbert = {
     import geotrellis.spark.io.index.hilbert._
     val max = (math.pow(2,32)-1).toInt
@@ -87,6 +90,8 @@ object ZCurveBenchmark extends App {
     val max = (math.pow(2,32)-1).toInt
     new RowMajorSpatialKeyIndex(KeyBounds(SpatialKey(0,0), SpatialKey(max, max)))
   }
+
+  // TODO: Cleanup, remove user-specific paths.
 
   println("Hilbert ...")
   val hilbertBench = SpatialIndexBenchmark.benchmark(hilbert)
