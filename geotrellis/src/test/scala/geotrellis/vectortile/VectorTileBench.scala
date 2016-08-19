@@ -1,7 +1,12 @@
 package benchmark.geotrellis.vectortile
 
+import geotrellis.raster.TileLayout
+import geotrellis.spark.SpatialKey
+import geotrellis.spark.tiling.LayoutDefinition
+import geotrellis.vector.Extent
 import geotrellis.vectortile.VectorTile
-import geotrellis.vectortile.protobuf._
+import geotrellis.vectortile.protobuf.ProtobufTile
+import vector_tile.{vector_tile => vt}
 
 import scaliper._
 
@@ -20,7 +25,7 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/onepoint.mvt"))
         }
 
-        def run() = Protobuf.decode(bytes)
+        def run() = vt.Tile.parseFrom(bytes)
       }
     }
 
@@ -32,7 +37,7 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/linestring.mvt"))
         }
 
-        def run() = Protobuf.decode(bytes)
+        def run() = vt.Tile.parseFrom(bytes)
       }
     }
 
@@ -44,7 +49,7 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/polygon.mvt"))
         }
 
-        def run() = Protobuf.decode(bytes)
+        def run() = vt.Tile.parseFrom(bytes)
       }
     }
 
@@ -56,7 +61,7 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/roads.mvt"))
         }
 
-        def run() = Protobuf.decode(bytes)
+        def run() = vt.Tile.parseFrom(bytes)
       }
     }
   }
@@ -65,13 +70,21 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
     run("onepoint.mvt") {
       new Benchmark {
         var bytes: Array[Byte] = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
 
         override def setUp() = {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/onepoint.mvt"))
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
         }
 
         def run() = {
-          val t = ProtobufTile(bytes)
+          val t = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
 
           /* Force geometry evaluation */
           t.layers.foreach {
@@ -90,13 +103,21 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
     run("linestring.mvt") {
       new Benchmark {
         var bytes: Array[Byte] = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
 
         override def setUp() = {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/linestring.mvt"))
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
         }
 
         def run() = {
-          val t = ProtobufTile(bytes)
+          val t = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
 
           /* Force geometry evaluation */
           t.layers.foreach {
@@ -116,13 +137,21 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
     run("polygon.mvt") {
       new Benchmark {
         var bytes: Array[Byte] = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
 
         override def setUp() = {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/polygon.mvt"))
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
         }
 
         def run() = {
-          val t = ProtobufTile(bytes)
+          val t = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
 
           /* Force geometry evaluation */
           t.layers.foreach {
@@ -142,13 +171,21 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
     run("roads.mvt") {
       new Benchmark {
         var bytes: Array[Byte] = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
 
         override def setUp() = {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/roads.mvt"))
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
         }
 
         def run() = {
-          val t = ProtobufTile(bytes)
+          val t = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
 
           /* Force geometry evaluation */
           t.layers.foreach {
@@ -167,62 +204,98 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
   }
 
   benchmark("Encoding: VectorTile -> Array[Byte]") {
+
     run("onepoint.mvt") {
       new Benchmark {
         var tile: VectorTile = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
 
         override def setUp() = {
           val bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/onepoint.mvt"))
-          tile = ProtobufTile(bytes)
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
+          tile = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
         }
 
         def run() = {
-          Protobuf.encode(tile.asInstanceOf[ProtobufTile].toProtobuf)
+          tile.asInstanceOf[ProtobufTile].toBytes
         }
       }
     }
 
+
     run("linestring.mvt") {
       new Benchmark {
         var tile: VectorTile = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
 
         override def setUp() = {
           val bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/linestring.mvt"))
-          tile = ProtobufTile(bytes)
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
+          tile = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
         }
 
         def run() = {
-          Protobuf.encode(tile.asInstanceOf[ProtobufTile].toProtobuf)
+          tile.asInstanceOf[ProtobufTile].toBytes
         }
       }
-        }
+    }
+
 
     run("polygon.mvt") {
       new Benchmark {
         var tile: VectorTile = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
 
         override def setUp() = {
           val bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/polygon.mvt"))
-          tile = ProtobufTile(bytes)
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
+          tile = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
         }
 
         def run() = {
-          Protobuf.encode(tile.asInstanceOf[ProtobufTile].toProtobuf)
+          tile.asInstanceOf[ProtobufTile].toBytes
         }
       }
-        }
+    }
+
 
     run("roads.mvt") {
       new Benchmark {
         var tile: VectorTile = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
 
         override def setUp() = {
           val bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/roads.mvt"))
-          tile = ProtobufTile(bytes)
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
+          tile = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
         }
 
         def run() = {
-          Protobuf.encode(tile.asInstanceOf[ProtobufTile].toProtobuf)
+          tile.asInstanceOf[ProtobufTile].toBytes
         }
       }
     }
@@ -232,13 +305,22 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
     run("polygon.mvt") {
       new Benchmark {
         var bytes: Array[Byte] = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
+
 
         override def setUp() = {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/polygon.mvt"))
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
         }
 
         def run() = {
-          val t = ProtobufTile(bytes)
+          val t = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
 
           t.layers.get("OnePolygon").get.polygons.head.geom
         }
@@ -248,13 +330,21 @@ class VectorTileBench extends Benchmarks with ConsoleReport {
     run("roads.mvt (water layer)") {
       new Benchmark {
         var bytes: Array[Byte] = _
+        var spatialKey: SpatialKey = _
+        var layout: LayoutDefinition = _
 
         override def setUp() = {
           bytes = Files.readAllBytes(Paths.get("geotrellis/src/test/resources/data/roads.mvt"))
+          spatialKey = SpatialKey(0, 0)
+          layout = LayoutDefinition(
+            Extent(0, 0, 4096, 4096),
+            TileLayout(1, 1, 4096, 4096)
+          )
+
         }
 
         def run() = {
-          val t = ProtobufTile(bytes)
+          val t = ProtobufTile.fromBytes(bytes, spatialKey, layout)._2
 
           t.layers.get("water").get.multiPolygons.head.geom.polygons.head
         }
