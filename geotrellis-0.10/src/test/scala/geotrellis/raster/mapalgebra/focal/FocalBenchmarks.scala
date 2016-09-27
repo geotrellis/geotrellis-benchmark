@@ -93,12 +93,11 @@ class FocalOperationsBenchmark extends Benchmarks {
           def run = get(r.focalMin(neighborhood(1)))
         }
       }
-      // TODO: make this serialize - currently unclear why it isn't
-      //run(s"std deviation: ${neighborhoodName(neighborhood(1))}") {
-      //  new Benchmark with FocalOperationsSetup {
-      //    def run = get(r.focalStandardDeviation(neighborhood(1)))
-      //  }
-      //}
+      run(s"std deviation: ${neighborhoodName(neighborhood(1))}") {
+        new Benchmark with FocalOperationsSetup {
+          def run = get(r.focalStandardDeviation(neighborhood(1)))
+        }
+      }
       run(s"median: ${neighborhoodName(neighborhood(1))}") {
         new Benchmark with FocalOperationsSetup {
           def run = get(r.focalMedian(neighborhood(1)))
@@ -153,4 +152,3 @@ class FocalOperationsBenchmark extends Benchmarks {
     }
   }
 }
-
