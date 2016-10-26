@@ -22,7 +22,7 @@ object Version {
    * Until the deployment of spark on 2.11 is fully addressed we are going to target 2.10 to minimize confusion.
    */
   val scala       = "2.10.4"
-  val crossScala  = Seq("2.11.5", "2.10.4")
+  val crossScala  = Seq("2.11.8", "2.10.6")
   val scalaTest   = "2.2.0"
   // val geotools    = "13.1"
   // val akka        = "2.3.9"
