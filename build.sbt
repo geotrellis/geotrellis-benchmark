@@ -18,7 +18,7 @@ lazy val commonSettings = Seq(
 
   resolvers += Resolver.bintrayRepo("azavea", "maven"),
   libraryDependencies ++= Seq(
-    "com.azavea" %% "scaliper" % "0.5.0-SNAPSHOT" % "test",
+    "com.azavea" %% "scaliper" % "0.5.0-c52f8a9" % "test",
     "org.scalatest"       %%  "scalatest"      % Version.scalaTest % "test"
   ),
 
